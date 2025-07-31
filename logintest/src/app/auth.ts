@@ -22,19 +22,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const notion = new NotionClient({ auth: process.env.NOTION_API_KEY });
           const databaseId = process.env.NOTION_DATABASE_ID!;
-          await notion.pages.create({
-            parent: { database_id: databaseId },
-            properties: {
-              Name: {
-                title: [
-                  { text: { content: user.name } },
-                ],
-              },
-              Email: {
-                email: user.email,
+          // 既存ユーザーの存在チェック
+          const search = await notion.databases.query({
+            database_id: databaseId,
+            filter: {
+              property: "Email",
+              email: {
+                equals: user.email,
               },
             },
           });
+          if (search.results.length === 0) {
+            await notion.pages.create({
+              parent: { database_id: databaseId },
+              properties: {
+                Name: {
+                  title: [
+                    { text: { content: user.name } },
+                  ],
+                },
+                Email: {
+                  email: user.email,
+                },
+              },
+            });
+          }
         } catch (e) {
           console.error("Notion登録エラー", e);
         }
