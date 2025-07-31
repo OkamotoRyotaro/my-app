@@ -1,4 +1,5 @@
 import { signIn, auth, signOut } from "@/app/auth"
+import Link from "next/link";
 
 export default async function Login() {
   const session = await auth();
@@ -8,6 +9,7 @@ export default async function Login() {
     <>
       {session !== null ? (
         <>
+          <Link href={"/dashboard"}>dashboard</Link>
           <h1>{session.user?.name}がログインしたよ</h1>
           <img src={session.user?.image as string} alt="user image" />
           <form
